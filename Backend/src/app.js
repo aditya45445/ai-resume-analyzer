@@ -13,7 +13,7 @@ app.use(cookieParser())
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://ai-resume-analyzer-eight-eosin.vercel.app'
+    'https://ai-resume-analyzer-pd6inzjeg-struglers.vercel.app'
 ];
 
 app.use(cors({
