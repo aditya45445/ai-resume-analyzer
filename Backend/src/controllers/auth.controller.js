@@ -98,47 +98,59 @@ export async function login(req, res) {
 }
 
 export async function getMe(req, res) {
+    try {
+        const userId = req.user
 
-    const userId = req.user
+        const user = await userModel.findById(userId.id)
 
-    const user = await userModel.findById(userId.id)
+        if (!user) {
+            return res.status(400).json({
+                message: "user not found"
+            })
+        }
 
-    if (!user) {
-        return res.status(400).json({
-            message: "user not found"
+        return res.status(200).json({
+            message: "user found successfully",
+            user
         })
+    } catch (error) {
+        console.error('Error getting user', error)
+        throw error
     }
 
-    return res.status(200).json({
-        message: "user found successfully",
-        user
-    })
+
 
 }
 
 export async function logout(req, res) {
 
-    const token = req.cookies.token
+    try {
+        const token = req.cookies.token
 
-    if (!token) {
-        return res.status(400).json({
-            message: 'user is not logged in'
+        if (!token) {
+            return res.status(400).json({
+                message: 'user is not logged in'
+            })
+        }
+
+        await tokenBlacklistModel.create({
+            token
         })
+
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        })
+
+        return res.status(200).json({
+            message: 'user logged out successfully'
+        })
+
+    } catch (error) {
+        console.error('Error logging out user', error)
+        throw error
     }
-
-    await tokenBlacklistModel.create({
-        token
-    })
-
-    res.clearCookie('token', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none'
-    })
-
-    return res.status(200).json({
-        message: 'user logged out successfully'
-    })
 }
 
 
