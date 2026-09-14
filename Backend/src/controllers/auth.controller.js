@@ -5,44 +5,47 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
 
 export async function register(req, res) {
+    try {
+        const { username, email, password } = req.body
 
-    const { username, email, password } = req.body
+        if (!username || !email || !password) {
+            return res.status(400).json({
+                message: 'all fields are required'
+            })
+        }
+        const hashPassword = await bcrypt.hash(password, 10)
 
-    if (!username || !email || !password) {
-        return res.status(400).json({
-            message: 'all fields are required'
+        const user = await userModel.create({
+            username,
+            email,
+            password: hashPassword
         })
+
+        const token = jwt.sign({
+            id: user._id
+        }, config.JWT_SECRET, {
+            expiresIn: '3d'
+        })
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true
+        })
+
+        return res.status(201).json({
+            message: 'user created successfully',
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+            },
+            token
+        })
+    } catch (error) {
+        console.error('Error registering user', error)
+        throw error
     }
-    const hashPassword = await bcrypt.hash(password, 10)
-
-    const user = await userModel.create({
-        username,
-        email,
-        password: hashPassword
-    })
-
-    const token = jwt.sign({
-        id: user._id
-    }, config.JWT_SECRET, {
-        expiresIn: '3d'
-    })
-
-    res.cookie('token', token, {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000
-    })
-
-    return res.status(201).json({
-        message: 'user created successfully',
-        user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-        },
-        token
-    })
 }
 
 export async function login(req, res) {
@@ -76,8 +79,7 @@ export async function login(req, res) {
         res.cookie('token', token, {
             httpOnly: true,
             sameSite: 'none',
-            secure: true,
-            maxAge: 24 * 60 * 60 * 1000
+            secure: true
         })
 
         return res.status(200).json({
@@ -90,10 +92,8 @@ export async function login(req, res) {
             token
         })
     } catch (error) {
-        return res.status(500).json({
-            message: 'internal server error',
-            error: error.message
-        })
+        console.error('Error logging in user', error)
+        throw error
     }
 }
 

@@ -10,12 +10,24 @@ const app = express();
 app.set('trust proxy', 1);
 app.use(express.json())
 app.use(cookieParser())
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://ai-resume-analyzer-eight-eosin.vercel.app'
+];
+
 app.use(cors({
-    origin: "https://ai-resume-analyzer-eight-eosin.vercel.app",
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS Not Allowed'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-}))
+}));
 
 app.use('/api/history', historyRouter)
 app.use('/api/report', interviewRouter)
