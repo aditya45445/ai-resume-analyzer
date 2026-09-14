@@ -6,11 +6,15 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors'
 
 const app = express();
+
+app.set('trust proxy', 1);
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
     origin: "https://ai-resume-analyzer-eight-eosin.vercel.app",
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
 app.use('/api/history', historyRouter)

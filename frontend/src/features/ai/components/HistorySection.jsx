@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { FileText, Clock, Loader2, ChevronRight, Section } from 'lucide-react'
-import { getHistory, getHistoryById } from '../services/history.api';
+import { getHistory, getHistoryById } from '../services/ai.api.js';
 
 
 const HistorySection = ({ onSelectReport }) => {
